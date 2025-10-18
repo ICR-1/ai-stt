@@ -221,6 +221,15 @@
                 <strong>Hasil Asli:</strong> <span id="originalTranscription"></span>
             </div>
             <div id="resultText" class="result-text"></div>
+            
+            <!-- TTS Section -->
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="ttsBtn" class="upload-btn" style="background: linear-gradient(45deg, #26de81, #20bf6b);">
+                    🔊 Text-to-Speech
+                </button>
+                <div id="ttsStatus" class="status hidden" style="margin-top: 10px;"></div>
+                <audio id="ttsPlayer" class="audio-player hidden" controls></audio>
+            </div>
         </div>
     </div>
 
@@ -231,6 +240,7 @@
                 this.audioChunks = [];
                 this.isRecording = false;
                 this.audioBlob = null;
+                this.currentTranscription = '';
                 
                 this.recordBtn = document.getElementById('recordBtn');
                 this.stopBtn = document.getElementById('stopBtn');
@@ -242,6 +252,9 @@
                 this.originalText = document.getElementById('originalText');
                 this.originalTranscription = document.getElementById('originalTranscription');
                 this.audioPlayer = document.getElementById('audioPlayer');
+                this.ttsBtn = document.getElementById('ttsBtn');
+                this.ttsStatus = document.getElementById('ttsStatus');
+                this.ttsPlayer = document.getElementById('ttsPlayer');
                 
                 this.setupEventListeners();
             }
@@ -251,6 +264,7 @@
                 this.stopBtn.addEventListener('click', () => this.stopRecording());
                 this.uploadBtn.addEventListener('click', () => this.uploadAudio());
                 this.audioFile.addEventListener('change', (e) => this.handleFileSelect(e));
+                this.ttsBtn.addEventListener('click', () => this.textToSpeech());
             }
             
             async startRecording() {
@@ -377,6 +391,9 @@
                 this.resultText.textContent = transcription;
                 this.resultSection.classList.remove('hidden');
                 
+                // Simpan text untuk TTS
+                this.currentTranscription = transcription;
+                
                 // Tampilkan hasil asli jika ada perbaikan
                 if (originalTranscription && improved) {
                     this.originalTranscription.textContent = originalTranscription;
@@ -392,6 +409,54 @@
                     this.audioPlayer.style.display = 'none';
                 }
             }
+            
+            async textToSpeech() {
+                if (!this.currentTranscription) {
+                    this.showTtsStatus('❌ Tidak ada text untuk TTS', 'error');
+                    return;
+                }
+                
+                this.showTtsStatus('🔄 Mengkonversi text ke speech...', 'processing');
+                this.ttsBtn.disabled = true;
+                
+                try {
+                    const response = await fetch('http://localhost:5000/tts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            text: this.currentTranscription
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                     if (result.success) {
+                         this.ttsPlayer.src = result.audio_url;
+                         this.ttsPlayer.classList.remove('hidden');
+                         this.showTtsStatus(`✅ TTS berhasil dibuat dengan ${result.method}!`, 'success');
+                     } else {
+                         throw new Error(result.error || 'TTS gagal');
+                     }
+                    
+                } catch (error) {
+                    console.error('TTS error:', error);
+                    this.showTtsStatus(`❌ Error: ${error.message}`, 'error');
+                } finally {
+                    this.ttsBtn.disabled = false;
+                }
+            }
+            
+            showTtsStatus(message, type) {
+                this.ttsStatus.textContent = message;
+                this.ttsStatus.className = `status ${type}`;
+                this.ttsStatus.classList.remove('hidden');
+            }
         }
         
         // Initialize the voice recorder when the page loads
@@ -401,4 +466,3 @@
     </script>
 </body>
 </html>
-

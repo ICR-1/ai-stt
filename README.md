@@ -7,6 +7,7 @@ Sistem voice recording dan transkripsi dengan frontend web dan backend Python me
 - 🎤 **Voice Recording**: Rekam audio langsung di browser menggunakan mikrofon
 - 📁 **File Upload**: Upload file audio yang sudah ada (WAV, MP3, M4A, OGG, FLAC, WEBM)
 - 🤖 **AI Transcription**: Transkripsi otomatis speech-to-text menggunakan Whisper AI
+- 🔊 **Text-to-Speech**: Konversi hasil transkripsi kembali ke audio dengan voice Indonesia yang natural
 - 🇮🇩 **Bahasa Indonesia**: Dioptimalkan khusus untuk bahasa Indonesia
 - ⚡ **Real-time Processing**: Transkripsi cepat dengan indikator progress
 - 🎨 **Modern UI**: Interface yang indah dan responsif dengan desain glassmorphism
@@ -16,7 +17,6 @@ Sistem voice recording dan transkripsi dengan frontend web dan backend Python me
 - `app_indonesia.py` - Server Flask backend utama
 - `index.html` - Frontend web interface
 - `requirements.txt` - Dependencies Python
-- `start_indonesia.bat` - Script untuk menjalankan server
 - `README.md` - Dokumentasi ini
 
 ## 🚀 Cara Instalasi
@@ -27,13 +27,8 @@ pip install -r requirements.txt
 ```
 
 2. **Jalankan server**:
-   ```bash
-   python app_indonesia.py
-   ```
-   
-   Atau gunakan batch file:
 ```bash
-   start_indonesia.bat
+   python app_indonesia.py
    ```
 
 3. **Buka browser** dan kunjungi:
@@ -58,10 +53,16 @@ pip install -r requirements.txt
 - Anda bisa memutar ulang audio asli
 - Waktu pemrosesan dan bahasa terdeteksi ditampilkan
 
+### Text-to-Speech
+- Setelah transkripsi selesai, klik tombol "Text-to-Speech"
+- Sistem akan mengkonversi text ke audio dengan voice Indonesia yang natural
+- Gunakan gTTS (Google) untuk voice yang lebih natural atau pyttsx3 (Local) untuk offline
+
 ## 🌐 API Endpoints
 
 - `GET /` - Halaman utama
 - `POST /transcribe` - Upload dan transkripsi audio
+- `POST /tts` - Konversi text ke speech
 - `GET /health` - Health check server
 - `GET /debug/files` - Debug: lihat file yang tersimpan
 - `GET /test-indonesia` - Test endpoint bahasa Indonesia
@@ -119,6 +120,11 @@ Sistem ini dioptimalkan khusus untuk bahasa Indonesia dengan:
 - Pastikan file dalam format yang didukung
 - Cek ukuran file (maksimal 50MB)
 - Pastikan file tidak korup
+
+### TTS Voice Tidak Natural
+- Sistem menggunakan gTTS (Google) sebagai default untuk voice Indonesia yang lebih natural
+- Jika ingin offline, gunakan pyttsx3 (Local) tapi mungkin aksen Inggris
+- Untuk voice Indonesia yang lebih baik, install Indonesian language pack di Windows
 
 ## 📝 Model Whisper
 
