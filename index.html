@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder dengan Whisper AI - Bahasa Indonesia</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .recorder-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .record-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px;
+        }
+        
+        .record-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .record-btn.recording {
+            background: linear-gradient(45deg, #ff3838, #c23616);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #2ed573, #1e90ff);
+            border: none;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 1.5em;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px;
+        }
+        
+        .stop-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #3742fa, #2f3542);
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .upload-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .status.recording {
+            background: rgba(255, 107, 107, 0.3);
+            border: 2px solid #ff6b6b;
+        }
+        
+        .status.processing {
+            background: rgba(255, 193, 7, 0.3);
+            border: 2px solid #ffc107;
+        }
+        
+        .status.success {
+            background: rgba(46, 213, 115, 0.3);
+            border: 2px solid #2ed573;
+        }
+        
+        .status.error {
+            background: rgba(255, 71, 87, 0.3);
+            border: 2px solid #ff4757;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .result-text {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+        }
+        
+        .file-input input[type="file"] {
+            display: none;
+        }
+        
+        .file-input label {
+            background: linear-gradient(45deg, #a55eea, #26de81);
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: inline-block;
+        }
+        
+        .file-input label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Voice Recorder dengan Whisper AI</h1>
+        <p style="text-align: center; margin-bottom: 20px; opacity: 0.8;">
+            💡 Tips: Bicara dengan jelas, hindari suara bising, test dengan "halo apa kabar"
+        </p>
+        
+        <div class="recorder-section">
+            <button id="recordBtn" class="record-btn">🎤</button>
+            <button id="stopBtn" class="stop-btn hidden">⏹️</button>
+            <div id="status" class="status hidden"></div>
+        </div>
+        
+        <div class="file-input">
+            <label for="audioFile">📁 Pilih File Audio</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+        
+        <div style="text-align: center;">
+            <button id="uploadBtn" class="upload-btn" disabled>🚀 Proses dengan Whisper AI</button>
+        </div>
+        
+        <div id="resultSection" class="result-section hidden">
+            <h3>📝 Hasil Transkripsi:</h3>
+            <audio id="audioPlayer" class="audio-player" controls></audio>
+            <div id="originalText" class="result-text hidden" style="background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; margin-bottom: 10px;">
+                <strong>Hasil Asli:</strong> <span id="originalTranscription"></span>
+            </div>
+            <div id="resultText" class="result-text"></div>
+        </div>
+    </div>
+
+    <script>
+        class VoiceRecorder {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                this.audioBlob = null;
+                
+                this.recordBtn = document.getElementById('recordBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.status = document.getElementById('status');
+                this.uploadBtn = document.getElementById('uploadBtn');
+                this.audioFile = document.getElementById('audioFile');
+                this.resultSection = document.getElementById('resultSection');
+                this.resultText = document.getElementById('resultText');
+                this.originalText = document.getElementById('originalText');
+                this.originalTranscription = document.getElementById('originalTranscription');
+                this.audioPlayer = document.getElementById('audioPlayer');
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                this.recordBtn.addEventListener('click', () => this.startRecording());
+                this.stopBtn.addEventListener('click', () => this.stopRecording());
+                this.uploadBtn.addEventListener('click', () => this.uploadAudio());
+                this.audioFile.addEventListener('change', (e) => this.handleFileSelect(e));
+            }
+            
+            async startRecording() {
+                try {
+                    // Konfigurasi audio yang lebih baik
+                    const audioConstraints = {
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true,
+                            sampleRate: 16000,  // Optimal untuk Whisper
+                            channelCount: 1       // Mono untuk Whisper
+                        }
+                    };
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+                    
+                    // Konfigurasi MediaRecorder untuk kualitas lebih baik
+                    const options = {
+                        mimeType: 'audio/webm;codecs=opus',
+                        audioBitsPerSecond: 128000
+                    };
+                    
+                    this.mediaRecorder = new MediaRecorder(stream, options);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        this.audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                        this.updateUI();
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    this.updateUI();
+                    
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    this.showStatus('Error: Tidak bisa mengakses mikrofon', 'error');
+                }
+            }
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                }
+            }
+            
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.audioBlob = file;
+                    this.updateUI();
+                }
+            }
+            
+            updateUI() {
+                if (this.isRecording) {
+                    this.recordBtn.classList.add('recording');
+                    this.stopBtn.classList.remove('hidden');
+                    this.showStatus('🔴 Sedang merekam... Klik stop ketika selesai', 'recording');
+                    this.uploadBtn.disabled = true;
+                } else if (this.audioBlob) {
+                    this.recordBtn.classList.remove('recording');
+                    this.stopBtn.classList.add('hidden');
+                    this.showStatus('✅ Audio siap! Klik "Proses dengan Whisper AI" untuk transkripsi', 'success');
+                    this.uploadBtn.disabled = false;
+                } else {
+                    this.recordBtn.classList.remove('recording');
+                    this.stopBtn.classList.add('hidden');
+                    this.status.classList.add('hidden');
+                    this.uploadBtn.disabled = true;
+                }
+            }
+            
+            showStatus(message, type) {
+                this.status.textContent = message;
+                this.status.className = `status ${type}`;
+                this.status.classList.remove('hidden');
+            }
+            
+            async uploadAudio() {
+                if (!this.audioBlob) return;
+                
+                this.showStatus('🔄 Memproses audio dengan Whisper AI...', 'processing');
+                this.uploadBtn.disabled = true;
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('audio', this.audioBlob, 'recording.wav');
+                    
+                    const response = await fetch('http://localhost:5000/transcribe', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showResult(result.transcription, result.audio_url, result.original_transcription, result.improved);
+                        this.showStatus('✅ Transkripsi berhasil diselesaikan!', 'success');
+                    } else {
+                        throw new Error(result.error || 'Transkripsi gagal');
+                    }
+                    
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    this.showStatus(`❌ Error: ${error.message}`, 'error');
+                } finally {
+                    this.uploadBtn.disabled = false;
+                }
+            }
+            
+            showResult(transcription, audioUrl, originalTranscription, improved) {
+                this.resultText.textContent = transcription;
+                this.resultSection.classList.remove('hidden');
+                
+                // Tampilkan hasil asli jika ada perbaikan
+                if (originalTranscription && improved) {
+                    this.originalTranscription.textContent = originalTranscription;
+                    this.originalText.classList.remove('hidden');
+                } else {
+                    this.originalText.classList.add('hidden');
+                }
+                
+                if (audioUrl) {
+                    this.audioPlayer.src = audioUrl;
+                    this.audioPlayer.style.display = 'block';
+                } else {
+                    this.audioPlayer.style.display = 'none';
+                }
+            }
+        }
+        
+        // Initialize the voice recorder when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceRecorder();
+        });
+    </script>
+</body>
+</html>
+
